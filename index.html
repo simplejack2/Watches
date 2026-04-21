@@ -61,10 +61,7 @@
       flex-wrap: wrap;
     }
 
-    #status-text {
-      font-size: .78rem;
-      color: var(--muted);
-    }
+    #status-text { font-size: .78rem; color: var(--muted); }
 
     button {
       cursor: pointer;
@@ -77,10 +74,7 @@
     }
     button:disabled { opacity: .45; cursor: not-allowed; }
 
-    #btn-refresh {
-      background: var(--accent);
-      color: #111;
-    }
+    #btn-refresh { background: var(--accent); color: #111; }
     #btn-refresh:not(:disabled):hover { background: #dbbf86; }
 
     /* ── Main ────────────────────────────────────────────────────────────── */
@@ -94,18 +88,12 @@
     }
 
     /* ── Spinner ─────────────────────────────────────────────────────────── */
-    #spinner {
-      display: none;
-      text-align: center;
-      padding: 60px 0;
-      color: var(--muted);
-    }
+    #spinner { display: none; text-align: center; padding: 60px 0; color: var(--muted); }
     #spinner.active { display: block; }
 
     .spin {
       display: inline-block;
-      width: 36px;
-      height: 36px;
+      width: 36px; height: 36px;
       border: 3px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
@@ -143,18 +131,9 @@
       flex-wrap: wrap;
     }
 
-    .brand-name {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--accent);
-      letter-spacing: .03em;
-    }
+    .brand-name { font-size: 1rem; font-weight: 600; color: var(--accent); letter-spacing: .03em; }
 
-    .brand-meta {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
+    .brand-meta { display: flex; align-items: center; gap: 14px; }
 
     .badge {
       background: var(--accent2);
@@ -165,36 +144,16 @@
       font-weight: 600;
     }
 
-    .brand-link {
-      font-size: .78rem;
-      color: var(--muted);
-      text-decoration: none;
-    }
+    .brand-link { font-size: .78rem; color: var(--muted); text-decoration: none; }
     .brand-link:hover { color: var(--accent); }
 
-    .brand-error {
-      padding: 18px 18px;
-      color: #e07070;
-      font-size: .82rem;
-      background: #1c0a0a;
-    }
-
-    .brand-empty {
-      padding: 24px 18px;
-      color: var(--muted);
-      font-size: .82rem;
-      font-style: italic;
-    }
+    .brand-error { padding: 18px; color: #e07070; font-size: .82rem; background: #1c0a0a; }
+    .brand-empty { padding: 24px 18px; color: var(--muted); font-size: .82rem; font-style: italic; }
 
     /* ── Table ───────────────────────────────────────────────────────────── */
-    .table-wrap {
-      overflow-x: auto;
-    }
+    .table-wrap { overflow-x: auto; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    table { width: 100%; border-collapse: collapse; }
 
     thead th {
       background: #1e1e1e;
@@ -209,24 +168,13 @@
       white-space: nowrap;
     }
 
-    tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background .1s;
-    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:nth-child(even) { background: var(--row-alt); }
     tbody tr:hover { background: #212121; }
+    tbody td { padding: 10px 14px; vertical-align: middle; font-size: .82rem; }
 
-    tbody td {
-      padding: 10px 14px;
-      vertical-align: middle;
-      font-size: .82rem;
-    }
-
-    .td-title {
-      max-width: 380px;
-      min-width: 180px;
-    }
+    .td-title { max-width: 380px; min-width: 180px; }
 
     .listing-link {
       color: var(--text);
@@ -239,34 +187,11 @@
     }
     .listing-link:hover { color: var(--accent); text-decoration: underline; }
 
-    .td-price {
-      white-space: nowrap;
-      color: var(--green);
-      font-weight: 600;
-      min-width: 80px;
-    }
+    .td-price { white-space: nowrap; color: var(--green); font-weight: 600; min-width: 80px; }
+    .td-source { color: var(--muted); white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+    .td-date { color: var(--muted); white-space: nowrap; min-width: 90px; }
 
-    .td-source {
-      color: var(--muted);
-      white-space: nowrap;
-      max-width: 140px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .td-date {
-      color: var(--muted);
-      white-space: nowrap;
-      min-width: 90px;
-    }
-
-    .ext-icon {
-      display: inline-block;
-      margin-left: 4px;
-      opacity: .45;
-      font-size: .68rem;
-      vertical-align: middle;
-    }
+    .ext-icon { display: inline-block; margin-left: 4px; opacity: .45; font-size: .68rem; vertical-align: middle; }
 
     /* ── Footer ──────────────────────────────────────────────────────────── */
     footer {
@@ -276,6 +201,7 @@
       padding: 20px;
       border-top: 1px solid var(--border);
     }
+    footer a { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -283,133 +209,113 @@
 <header>
   <div class="header-left">
     <h1>Watch Brand Aggregator</h1>
-    <p>Live listings from WatchRecon.com</p>
+    <p>Listings from WatchRecon.com &mdash; auto-updated every 4 hours</p>
   </div>
   <div class="header-right">
-    <span id="status-text">Not loaded yet</span>
-    <button id="btn-refresh">Refresh Data</button>
+    <span id="status-text">Loading…</span>
+    <button id="btn-refresh">&#8635; Reload</button>
   </div>
 </header>
 
 <main>
   <div id="spinner">
     <div class="spin"></div>
-    <p id="spinner-msg">Scraping WatchRecon — this may take 30–60 seconds…</p>
+    <p>Loading listings…</p>
   </div>
-
   <div id="global-error"></div>
   <div id="brands-container"></div>
 </main>
 
 <footer>
-  Data sourced from <a href="https://www.watchrecon.com" target="_blank" rel="noopener" style="color:var(--accent)">WatchRecon.com</a>.
-  Results are cached for 10 minutes.
+  Data sourced from <a href="https://www.watchrecon.com" target="_blank" rel="noopener">WatchRecon.com</a>.
+  Refreshed automatically every 4 hours via GitHub Actions.
 </footer>
 
 <script>
   const btnRefresh = document.getElementById('btn-refresh');
   const statusText = document.getElementById('status-text');
   const spinner    = document.getElementById('spinner');
-  const spinnerMsg = document.getElementById('spinner-msg');
   const globalErr  = document.getElementById('global-error');
   const container  = document.getElementById('brands-container');
 
-  function setLoading(loading, msg = 'Scraping WatchRecon — this may take 30–60 seconds…') {
-    btnRefresh.disabled = loading;
-    spinner.classList.toggle('active', loading);
-    spinnerMsg.textContent = msg;
-    if (loading) {
-      container.innerHTML = '';
-      globalErr.style.display = 'none';
-    }
+  function setLoading(on) {
+    btnRefresh.disabled = on;
+    spinner.classList.toggle('active', on);
+    if (on) { container.innerHTML = ''; globalErr.style.display = 'none'; }
   }
 
   function showError(msg) {
     globalErr.textContent = '⚠ ' + msg;
     globalErr.style.display = 'block';
+    statusText.textContent = 'Error';
   }
 
-  function formatDate(iso) {
+  function fmt(iso) {
     if (!iso) return '';
     try {
       return new Date(iso).toLocaleString(undefined, {
-        month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit',
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
       });
     } catch { return iso; }
   }
 
-  function renderBrands(data) {
-    const { brands, fromCache, cachedAt } = data;
+  function esc(s) {
+    return String(s || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
-    const cacheNote = fromCache
-      ? `Cached — last fetched ${formatDate(cachedAt)}`
-      : `Updated ${formatDate(cachedAt)}`;
-    statusText.textContent = cacheNote;
+  function render(data) {
+    statusText.textContent = data.generatedAt
+      ? 'Last updated ' + fmt(data.generatedAt)
+      : 'Loaded';
 
     container.innerHTML = '';
 
-    brands.forEach(brand => {
+    (data.brands || []).forEach(brand => {
       const card = document.createElement('div');
       card.className = 'brand-card';
 
-      const header = document.createElement('div');
-      header.className = 'brand-header';
-      header.innerHTML = `
-        <span class="brand-name">${esc(brand.name)}</span>
-        <div class="brand-meta">
-          <span class="badge">${brand.count} listing${brand.count !== 1 ? 's' : ''}</span>
-          <a class="brand-link" href="${esc(brand.url)}" target="_blank" rel="noopener">
-            View on WatchRecon ↗
-          </a>
+      card.innerHTML = `
+        <div class="brand-header">
+          <span class="brand-name">${esc(brand.name)}</span>
+          <div class="brand-meta">
+            <span class="badge">${brand.count} listing${brand.count !== 1 ? 's' : ''}</span>
+            <a class="brand-link" href="${esc(brand.url)}" target="_blank" rel="noopener">
+              View on WatchRecon &#8599;
+            </a>
+          </div>
         </div>
       `;
-      card.appendChild(header);
 
       if (brand.error) {
-        const errDiv = document.createElement('div');
-        errDiv.className = 'brand-error';
-        errDiv.textContent = '⚠ Scrape error: ' + brand.error;
-        card.appendChild(errDiv);
-      } else if (!brand.listings.length) {
-        const emptyDiv = document.createElement('div');
-        emptyDiv.className = 'brand-empty';
-        emptyDiv.textContent = 'No listings found. The brand slug may need adjustment.';
-        card.appendChild(emptyDiv);
+        card.insertAdjacentHTML('beforeend',
+          `<div class="brand-error">⚠ Scrape error: ${esc(brand.error)}</div>`);
+      } else if (!brand.listings || !brand.listings.length) {
+        card.insertAdjacentHTML('beforeend',
+          `<div class="brand-empty">No listings found.</div>`);
       } else {
         const wrap = document.createElement('div');
         wrap.className = 'table-wrap';
-
-        const table = document.createElement('table');
-        table.innerHTML = `
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Price</th>
-              <th>Source</th>
-              <th>Listed</th>
-            </tr>
-          </thead>
-        `;
-
-        const tbody = document.createElement('tbody');
-        brand.listings.forEach(listing => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="td-title">
-              <a class="listing-link" href="${esc(listing.url)}" target="_blank" rel="noopener">
-                ${esc(listing.title)}<span class="ext-icon">↗</span>
-              </a>
-            </td>
-            <td class="td-price">${esc(listing.price)}</td>
-            <td class="td-source" title="${esc(listing.source)}">${esc(listing.source)}</td>
-            <td class="td-date">${esc(listing.date)}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-
-        table.appendChild(tbody);
-        wrap.appendChild(table);
+        wrap.innerHTML = `
+          <table>
+            <thead><tr>
+              <th>Title</th><th>Price</th><th>Source</th><th>Listed</th>
+            </tr></thead>
+            <tbody>
+              ${brand.listings.map(l => `
+                <tr>
+                  <td class="td-title">
+                    <a class="listing-link" href="${esc(l.url)}" target="_blank" rel="noopener">
+                      ${esc(l.title)}<span class="ext-icon">&#8599;</span>
+                    </a>
+                  </td>
+                  <td class="td-price">${esc(l.price)}</td>
+                  <td class="td-source" title="${esc(l.source)}">${esc(l.source)}</td>
+                  <td class="td-date">${esc(l.date)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>`;
         card.appendChild(wrap);
       }
 
@@ -417,40 +323,23 @@
     });
   }
 
-  function esc(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  async function load(force = false) {
-    setLoading(true, force
-      ? 'Forcing fresh scrape — this may take 30–60 seconds…'
-      : 'Loading listings — this may take 30–60 seconds…');
-
+  async function load() {
+    setLoading(true);
     try {
-      const url = force ? '/api/scrape?force=1' : '/api/scrape';
-      const res  = await fetch(url);
+      // Cache-bust so the browser always fetches the latest committed data.json
+      const res  = await fetch('./data.json?t=' + Date.now());
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
-
-      if (!data.ok) throw new Error(data.error || 'Unknown server error');
-
-      renderBrands(data);
+      render(data);
     } catch (err) {
       showError(err.message);
-      statusText.textContent = 'Failed';
     } finally {
       setLoading(false);
     }
   }
 
-  btnRefresh.addEventListener('click', () => load(true));
-
-  // Auto-load on page open
-  load(false);
+  btnRefresh.addEventListener('click', load);
+  load();
 </script>
 </body>
 </html>

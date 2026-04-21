@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "generate": "node generate.js",
     "setup": "npx playwright install chromium --with-deps"
   },
   "dependencies": {
