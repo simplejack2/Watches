@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watch Brand Aggregator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #161616;
+      --border:   #2a2a2a;
+      --accent:   #c8a96e;
+      --accent2:  #8a6e3e;
+      --text:     #e8e8e8;
+      --muted:    #888;
+      --danger:   #c0392b;
+      --green:    #27ae60;
+      --row-alt:  #1a1a1a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .header-left h1 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--accent);
+    }
+
+    .header-left p {
+      color: var(--muted);
+      font-size: .8rem;
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    #status-text {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      font-size: .82rem;
+      font-weight: 500;
+      padding: 8px 18px;
+      transition: opacity .15s, background .15s;
+    }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+
+    #btn-refresh {
+      background: var(--accent);
+      color: #111;
+    }
+    #btn-refresh:not(:disabled):hover { background: #dbbf86; }
+
+    /* ── Main ────────────────────────────────────────────────────────────── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* ── Spinner ─────────────────────────────────────────────────────────── */
+    #spinner {
+      display: none;
+      text-align: center;
+      padding: 60px 0;
+      color: var(--muted);
+    }
+    #spinner.active { display: block; }
+
+    .spin {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin-bottom: 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Global error ────────────────────────────────────────────────────── */
+    #global-error {
+      display: none;
+      background: #2a0d0d;
+      border: 1px solid var(--danger);
+      border-radius: 6px;
+      padding: 16px 20px;
+      color: #e07070;
+      font-size: .85rem;
+    }
+
+    /* ── Brand card ──────────────────────────────────────────────────────── */
+    .brand-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: .03em;
+    }
+
+    .brand-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .badge {
+      background: var(--accent2);
+      color: #f0e0c0;
+      border-radius: 12px;
+      padding: 2px 10px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+
+    .brand-link {
+      font-size: .78rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .brand-link:hover { color: var(--accent); }
+
+    .brand-error {
+      padding: 18px 18px;
+      color: #e07070;
+      font-size: .82rem;
+      background: #1c0a0a;
+    }
+
+    .brand-empty {
+      padding: 24px 18px;
+      color: var(--muted);
+      font-size: .82rem;
+      font-style: italic;
+    }
+
+    /* ── Table ───────────────────────────────────────────────────────────── */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background: #1e1e1e;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:nth-child(even) { background: var(--row-alt); }
+    tbody tr:hover { background: #212121; }
+
+    tbody td {
+      padding: 10px 14px;
+      vertical-align: middle;
+      font-size: .82rem;
+    }
+
+    .td-title {
+      max-width: 380px;
+      min-width: 180px;
+    }
+
+    .listing-link {
+      color: var(--text);
+      text-decoration: none;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+    }
+    .listing-link:hover { color: var(--accent); text-decoration: underline; }
+
+    .td-price {
+      white-space: nowrap;
+      color: var(--green);
+      font-weight: 600;
+      min-width: 80px;
+    }
+
+    .td-source {
+      color: var(--muted);
+      white-space: nowrap;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .td-date {
+      color: var(--muted);
+      white-space: nowrap;
+      min-width: 90px;
+    }
+
+    .ext-icon {
+      display: inline-block;
+      margin-left: 4px;
+      opacity: .45;
+      font-size: .68rem;
+      vertical-align: middle;
+    }
+
+    /* ── Footer ──────────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      font-size: .72rem;
+      color: var(--muted);
+      padding: 20px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Watch Brand Aggregator</h1>
+    <p>Live listings from WatchRecon.com</p>
+  </div>
+  <div class="header-right">
+    <span id="status-text">Not loaded yet</span>
+    <button id="btn-refresh">Refresh Data</button>
+  </div>
+</header>
+
+<main>
+  <div id="spinner">
+    <div class="spin"></div>
+    <p id="spinner-msg">Scraping WatchRecon — this may take 30–60 seconds…</p>
+  </div>
+
+  <div id="global-error"></div>
+  <div id="brands-container"></div>
+</main>
+
+<footer>
+  Data sourced from <a href="https://www.watchrecon.com" target="_blank" rel="noopener" style="color:var(--accent)">WatchRecon.com</a>.
+  Results are cached for 10 minutes.
+</footer>
+
+<script>
+  const btnRefresh = document.getElementById('btn-refresh');
+  const statusText = document.getElementById('status-text');
+  const spinner    = document.getElementById('spinner');
+  const spinnerMsg = document.getElementById('spinner-msg');
+  const globalErr  = document.getElementById('global-error');
+  const container  = document.getElementById('brands-container');
+
+  function setLoading(loading, msg = 'Scraping WatchRecon — this may take 30–60 seconds…') {
+    btnRefresh.disabled = loading;
+    spinner.classList.toggle('active', loading);
+    spinnerMsg.textContent = msg;
+    if (loading) {
+      container.innerHTML = '';
+      globalErr.style.display = 'none';
+    }
+  }
+
+  function showError(msg) {
+    globalErr.textContent = '⚠ ' + msg;
+    globalErr.style.display = 'block';
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    try {
+      return new Date(iso).toLocaleString(undefined, {
+        month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      });
+    } catch { return iso; }
+  }
+
+  function renderBrands(data) {
+    const { brands, fromCache, cachedAt } = data;
+
+    const cacheNote = fromCache
+      ? `Cached — last fetched ${formatDate(cachedAt)}`
+      : `Updated ${formatDate(cachedAt)}`;
+    statusText.textContent = cacheNote;
+
+    container.innerHTML = '';
+
+    brands.forEach(brand => {
+      const card = document.createElement('div');
+      card.className = 'brand-card';
+
+      const header = document.createElement('div');
+      header.className = 'brand-header';
+      header.innerHTML = `
+        <span class="brand-name">${esc(brand.name)}</span>
+        <div class="brand-meta">
+          <span class="badge">${brand.count} listing${brand.count !== 1 ? 's' : ''}</span>
+          <a class="brand-link" href="${esc(brand.url)}" target="_blank" rel="noopener">
+            View on WatchRecon ↗
+          </a>
+        </div>
+      `;
+      card.appendChild(header);
+
+      if (brand.error) {
+        const errDiv = document.createElement('div');
+        errDiv.className = 'brand-error';
+        errDiv.textContent = '⚠ Scrape error: ' + brand.error;
+        card.appendChild(errDiv);
+      } else if (!brand.listings.length) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'brand-empty';
+        emptyDiv.textContent = 'No listings found. The brand slug may need adjustment.';
+        card.appendChild(emptyDiv);
+      } else {
+        const wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+
+        const table = document.createElement('table');
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Price</th>
+              <th>Source</th>
+              <th>Listed</th>
+            </tr>
+          </thead>
+        `;
+
+        const tbody = document.createElement('tbody');
+        brand.listings.forEach(listing => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="td-title">
+              <a class="listing-link" href="${esc(listing.url)}" target="_blank" rel="noopener">
+                ${esc(listing.title)}<span class="ext-icon">↗</span>
+              </a>
+            </td>
+            <td class="td-price">${esc(listing.price)}</td>
+            <td class="td-source" title="${esc(listing.source)}">${esc(listing.source)}</td>
+            <td class="td-date">${esc(listing.date)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+        card.appendChild(wrap);
+      }
+
+      container.appendChild(card);
+    });
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  async function load(force = false) {
+    setLoading(true, force
+      ? 'Forcing fresh scrape — this may take 30–60 seconds…'
+      : 'Loading listings — this may take 30–60 seconds…');
+
+    try {
+      const url = force ? '/api/scrape?force=1' : '/api/scrape';
+      const res  = await fetch(url);
+      const data = await res.json();
+
+      if (!data.ok) throw new Error(data.error || 'Unknown server error');
+
+      renderBrands(data);
+    } catch (err) {
+      showError(err.message);
+      statusText.textContent = 'Failed';
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  btnRefresh.addEventListener('click', () => load(true));
+
+  // Auto-load on page open
+  load(false);
+</script>
+</body>
+</html>

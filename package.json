@@ -1,0 +1,14 @@
+{
+  "name": "watch-brand-aggregator",
+  "version": "1.0.0",
+  "description": "Scrapes watchrecon.com for A. Lange & Söhne, Breitling, Jaeger-LeCoultre, and Omega listings",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "setup": "npx playwright install chromium --with-deps"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "playwright": "^1.41.0"
+  }
+}
