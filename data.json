@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-13T04:10:18.225Z",
+  "generatedAt": "2026-06-13T10:33:19.099Z",
   "brands": [
     {
       "name": "A. Lange & Söhne",
       "url": "https://www.watchrecon.com/?brand=a.+lange+%26+sohne",
       "listings": [],
       "count": 0,
-      "scrapedAt": "2026-06-13T04:10:08.536Z",
+      "scrapedAt": "2026-06-13T10:33:07.871Z",
       "error": null
     },
     {
@@ -14,7 +14,7 @@
       "url": "https://www.watchrecon.com/?brand=breitling",
       "listings": [],
       "count": 0,
-      "scrapedAt": "2026-06-13T04:10:11.781Z",
+      "scrapedAt": "2026-06-13T10:33:11.780Z",
       "error": null
     },
     {
@@ -22,7 +22,7 @@
       "url": "https://www.watchrecon.com/?brand=jaeger-lecoultre",
       "listings": [],
       "count": 0,
-      "scrapedAt": "2026-06-13T04:10:14.983Z",
+      "scrapedAt": "2026-06-13T10:33:15.509Z",
       "error": null
     },
     {
@@ -30,7 +30,7 @@
       "url": "https://www.watchrecon.com/?brand=omega",
       "listings": [],
       "count": 0,
-      "scrapedAt": "2026-06-13T04:10:18.196Z",
+      "scrapedAt": "2026-06-13T10:33:19.070Z",
       "error": null
     }
   ]
