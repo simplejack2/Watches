@@ -321,7 +321,7 @@
               ${brand.listings.map(l => `
                 <tr>
                   <td class="td-thumb">${l.thumb
-                    ? `<img class="thumb" src="${esc(l.thumb)}" loading="lazy" alt="">`
+                    ? `<img class="thumb" src="${esc(l.thumb)}" loading="lazy" referrerpolicy="no-referrer" alt="" onerror="this.style.visibility='hidden'">`
                     : '<div class="thumb-ph"></div>'}</td>
                   <td class="td-title">
                     <a class="listing-link" href="${esc(l.url)}" target="_blank" rel="noopener">
