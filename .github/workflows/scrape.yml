@@ -5,7 +5,12 @@ on:
     # Every 4 hours
     - cron: '0 */4 * * *'
   push:
-    branches: [main]
+    # Re-scrape whenever the scraper logic changes (data.json commits carry
+    # [skip ci] and aren't listed here, so this never self-triggers).
+    paths:
+      - 'scraper.js'
+      - 'generate.js'
+      - '.github/workflows/scrape.yml'
   workflow_dispatch:
 
 jobs:

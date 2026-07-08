@@ -2,17 +2,24 @@
 
 const { chromium } = require('playwright');
 
+// Brand values are the exact `brand` query params watchrecon.com understands.
 const BRANDS = [
-  { name: 'A. Lange & Söhne', slug: 'a.+lange+%26+sohne' },
-  { name: 'Breitling',         slug: 'breitling' },
-  { name: 'Jaeger-LeCoultre',  slug: 'jaeger-lecoultre' },
-  { name: 'Omega',             slug: 'omega' },
+  { name: 'A. Lange & Söhne', brand: 'a. lange & sohne' },
+  { name: 'Breitling',         brand: 'breitling' },
+  { name: 'Jaeger-LeCoultre',  brand: 'jaeger-lecoultre' },
+  { name: 'Omega',             brand: 'omega' },
 ];
 
 const BASE_URL = 'https://www.watchrecon.com';
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_PER_BRAND = 80;
 
 let _cache = { data: null, ts: 0 };
+
+function brandUrl(brand) {
+  // URLSearchParams encodes spaces as '+' and '&' as %26 — matches watchrecon.
+  return `${BASE_URL}/?${new URLSearchParams({ brand }).toString()}`;
+}
 
 async function _makeBrowser() {
   return chromium.launch({
@@ -36,11 +43,9 @@ async function _makePage(browser) {
       Accept:
         'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
       'Accept-Language': 'en-US,en;q=0.9',
-      'Cache-Control': 'no-cache',
     },
   });
 
-  // Hide playwright's webdriver fingerprint
   await ctx.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => false });
     window.chrome = { runtime: {} };
@@ -49,119 +54,78 @@ async function _makePage(browser) {
   return ctx.newPage();
 }
 
-// Extract listings from the current Playwright page.
-// Tries a table-row strategy first, then falls back to card selectors.
+// Extract listings from watchrecon's gallery view.
+// Structure (confirmed against the live page):
+//   .galleryItemContainer
+//     a.listingLink[href]                 -> external listing URL + thumbnail
+//     .subjectInfo a[data-original-title] -> full title
+//     .priceInfo / .brandInfo / .modelInfo
+//     .postDateInfo / .sourceInfo / .userNameInfo a
+//     a[href*="detail.php"]               -> watchrecon detail permalink
 async function _extract(page) {
-  return page.evaluate(() => {
-    const results = [];
-    const seen = new Set();
-
+  return page.evaluate(base => {
+    const clean = s => (s || '').replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
     const abs = href => {
       if (!href) return null;
+      if (href.startsWith('http')) return href;
       if (href.startsWith('//')) return 'https:' + href;
-      if (href.startsWith('/')) return 'https://www.watchrecon.com' + href;
-      return href;
+      if (href.startsWith('/')) return base + href;
+      return base + '/' + href.replace(/^\.\//, '');
     };
+    const text = (el, sel) => clean(el.querySelector(sel)?.textContent);
 
-    const clean = el => (el ? el.textContent.trim() : '');
+    const items = [];
+    const seen = new Set();
 
-    // ── Strategy 1: table rows ──────────────────────────────────────────────
-    document.querySelectorAll('table tr').forEach(row => {
-      const anchors = Array.from(row.querySelectorAll('a[href]'));
-      if (!anchors.length) return;
-
-      // Prefer external (off-site) links; fall back to any link
-      const link =
-        anchors.find(a => {
-          const h = a.getAttribute('href') || '';
-          return (
-            h.startsWith('http') &&
-            !h.includes('watchrecon.com') &&
-            !h.startsWith('javascript')
-          );
-        }) || anchors[0];
-
-      const href = abs(link.getAttribute('href'));
+    document.querySelectorAll('.galleryItemContainer').forEach(card => {
+      const link = card.querySelector('a.listingLink[href]');
+      const href = link && link.getAttribute('href');
       if (!href || seen.has(href)) return;
       seen.add(href);
 
-      const cells = Array.from(row.querySelectorAll('td')).map(clean);
+      const titleEl = card.querySelector('.subjectInfo a.listingLink') || link;
+      const title =
+        clean(titleEl.getAttribute('data-original-title') || titleEl.textContent) ||
+        '(untitled listing)';
 
-      const price =
-        cells.find(t => /[$€£][\d,. ]+|[\d,.]+\s*[$€£]/.test(t)) || '';
-      const date =
-        cells.find(t =>
-          /\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|\d+\s*(sec|min|hr|hour|day|week|month)s?\s*ago/i.test(
-            t
-          )
-        ) || '';
-      const source =
-        cells.find(
-          t =>
-            /(watchuseek|reddit|timezone|chrono24|forums?\.|\.com)/i.test(t) &&
-            t.length < 60 &&
-            !t.includes('$')
-        ) || '';
+      const thumbEl = card.querySelector('img.thumb');
+      const detailEl = card.querySelector('a[href*="detail.php"]');
 
-      results.push({
-        title: clean(link) || cells[0] || '(no title)',
-        url: href,
-        price,
-        date,
-        source,
+      items.push({
+        title,
+        url: href,                                  // direct off-site listing link
+        price: text(card, '.priceInfo'),
+        brand: text(card, '.brandInfo'),
+        model: text(card, '.modelInfo'),
+        date: text(card, '.postDateInfo'),
+        source: text(card, '.sourceInfo').replace(/^on\s+/i, ''),
+        seller: text(card, '.userNameInfo a'),
+        thumb: thumbEl ? abs(thumbEl.getAttribute('src')) : null,
+        detailUrl: detailEl ? abs(detailEl.getAttribute('href')) : null,
       });
     });
 
-    if (results.length > 0) return results;
-
-    // ── Strategy 2: card / div listings ────────────────────────────────────
-    const cardSelectors = [
-      '[class*="result"]',
-      '[class*="listing"]',
-      '[class*="watch-item"]',
-      '[class*="item"]',
-      'article',
-      '.row',
-    ];
-
-    for (const sel of cardSelectors) {
-      const cards = document.querySelectorAll(sel);
-      if (cards.length < 2) continue;
-
-      cards.forEach(card => {
-        const link = card.querySelector('a[href]');
-        if (!link) return;
-        const href = abs(link.getAttribute('href'));
-        if (!href || seen.has(href)) return;
-        seen.add(href);
-
-        results.push({
-          title: clean(link) || '(no title)',
-          url: href,
-          price: clean(card.querySelector('[class*="price"]')),
-          date: clean(card.querySelector('[class*="date"], time')),
-          source: clean(card.querySelector('[class*="source"],[class*="forum"],[class*="site"]')),
-        });
-      });
-
-      if (results.length > 0) break;
-    }
-
-    return results;
-  });
+    return items;
+  }, BASE_URL);
 }
 
 async function scrapeBrand(page, brand) {
-  const url = `${BASE_URL}/?brand=${brand.slug}`;
-  await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
-  // Give JS-rendered content a moment to paint
-  await page.waitForTimeout(2500);
-  return _extract(page);
+  const url = brandUrl(brand.brand);
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+
+  // Wait for listings to render; if none appear, treat as zero results.
+  try {
+    await page.waitForSelector('.galleryItemContainer', { timeout: 15000 });
+  } catch {
+    return [];
+  }
+
+  const listings = await _extract(page);
+  return listings.slice(0, MAX_PER_BRAND);
 }
 
 /**
- * Scrape all four brands. Results are cached for CACHE_TTL_MS.
- * Pass force=true to bypass the cache.
+ * Scrape all brands. Results cached for CACHE_TTL_MS unless force=true.
  */
 async function scrapeAllBrands(force = false) {
   if (!force && _cache.data && Date.now() - _cache.ts < CACHE_TTL_MS) {
@@ -188,7 +152,7 @@ async function scrapeAllBrands(force = false) {
 
     brands.push({
       name: brand.name,
-      url: `${BASE_URL}/?brand=${brand.slug}`,
+      url: brandUrl(brand.brand),
       listings,
       count: listings.length,
       scrapedAt: new Date().toISOString(),
@@ -202,4 +166,4 @@ async function scrapeAllBrands(force = false) {
   return { brands, fromCache: false, cachedAt: new Date(_cache.ts).toISOString() };
 }
 
-module.exports = { scrapeAllBrands, BRANDS };
+module.exports = { scrapeAllBrands, BRANDS, brandUrl };

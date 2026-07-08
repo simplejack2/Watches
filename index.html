@@ -189,7 +189,22 @@
 
     .td-price { white-space: nowrap; color: var(--green); font-weight: 600; min-width: 80px; }
     .td-source { color: var(--muted); white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+    .td-seller { color: var(--muted); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
     .td-date { color: var(--muted); white-space: nowrap; min-width: 90px; }
+
+    .td-thumb { width: 56px; padding: 6px 8px 6px 14px; }
+    .thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; display: block; background: #222; }
+    .thumb-ph { width: 48px; height: 48px; border-radius: 4px; background: #222; }
+
+    .model-tag {
+      display: inline-block;
+      margin-top: 3px;
+      font-size: .7rem;
+      color: var(--accent2);
+      background: #201a10;
+      border-radius: 3px;
+      padding: 1px 6px;
+    }
 
     .ext-icon { display: inline-block; margin-left: 4px; opacity: .45; font-size: .68rem; vertical-align: middle; }
 
@@ -300,18 +315,23 @@
         wrap.innerHTML = `
           <table>
             <thead><tr>
-              <th>Title</th><th>Price</th><th>Source</th><th>Listed</th>
+              <th></th><th>Title</th><th>Price</th><th>Source</th><th>Seller</th><th>Listed</th>
             </tr></thead>
             <tbody>
               ${brand.listings.map(l => `
                 <tr>
+                  <td class="td-thumb">${l.thumb
+                    ? `<img class="thumb" src="${esc(l.thumb)}" loading="lazy" alt="">`
+                    : '<div class="thumb-ph"></div>'}</td>
                   <td class="td-title">
                     <a class="listing-link" href="${esc(l.url)}" target="_blank" rel="noopener">
                       ${esc(l.title)}<span class="ext-icon">&#8599;</span>
                     </a>
+                    ${l.model ? `<span class="model-tag">${esc(l.model)}</span>` : ''}
                   </td>
                   <td class="td-price">${esc(l.price)}</td>
                   <td class="td-source" title="${esc(l.source)}">${esc(l.source)}</td>
+                  <td class="td-seller">${esc(l.seller)}</td>
                   <td class="td-date">${esc(l.date)}</td>
                 </tr>`).join('')}
             </tbody>
