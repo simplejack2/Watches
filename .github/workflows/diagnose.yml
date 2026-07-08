@@ -2,6 +2,10 @@ name: Diagnose WatchRecon
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'diagnose.js'
+      - '.github/workflows/diagnose.yml'
 
 jobs:
   diagnose:
