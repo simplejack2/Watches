@@ -120,6 +120,14 @@ async function probeBrowser() {
   });
   line(candidate);
 
+  hr('FULL GALLERY ITEM OUTERHTML (first 2)');
+  const items = await page.evaluate(() => {
+    const els = document.querySelectorAll('.galleryItemContainer');
+    return { count: els.length, html: Array.from(els).slice(0, 2).map(e => e.outerHTML) };
+  });
+  line('galleryItemContainer count = ' + items.count);
+  items.html.forEach((h, i) => { line(`\n--- ITEM ${i} ---\n` + h); });
+
   hr('API / JSON RESPONSES SEEN');
   if (apiHits.length === 0) line('(none)');
   apiHits.slice(0, 20).forEach(h => line(`${h.status} ${h.ct}  ${h.url}`));
